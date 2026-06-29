@@ -1,0 +1,15 @@
+const heartbeatService = require('../services/heartbeat.service');
+const { success, error } = require('../utils/response');
+
+const createHeartbeat = async (req, res) => {
+  try {
+    const device = await heartbeatService.registerHeartbeat(req.body);
+    return success(res, 'Heartbeat received', device, 201);
+  } catch (err) {
+    return error(res, err.message, err.statusCode || 500);
+  }
+};
+
+module.exports = {
+  createHeartbeat
+};
