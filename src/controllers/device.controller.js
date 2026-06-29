@@ -4,8 +4,12 @@ const { success, error } = require('../utils/response');
 const storeDevice = async (req, res) => {
   try {
     const device = await deviceService.storeDevice(req.body);
+    console.log(
+      `[DEVICE] stored name="${device.deviceName}" uuid=${device.uuid} user=${device.user} status=${device.status}`
+    );
     return success(res, 'Device stored', device, 201);
   } catch (err) {
+    console.error(`[DEVICE] failed: ${err.message}`);
     return error(res, err.message, err.statusCode || 500);
   }
 };

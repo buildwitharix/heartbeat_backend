@@ -10,6 +10,15 @@ const registerUser = async (req, res) => {
   }
 };
 
+const loginUser = async (req, res) => {
+  try {
+    const user = await userService.loginUser(req.body);
+    return success(res, 'User logged in', user);
+  } catch (err) {
+    return error(res, err.message, err.statusCode || 500);
+  }
+};
+
 const getUserDetails = async (req, res) => {
   try {
     const details = await userService.getUserDetails(req.params.userId);
@@ -21,5 +30,6 @@ const getUserDetails = async (req, res) => {
 
 module.exports = {
   registerUser,
+  loginUser,
   getUserDetails
 };
