@@ -5,6 +5,7 @@ const heartbeatRoutes = require('./routes/heartbeat.routes');
 const deviceRoutes = require('./routes/device.routes');
 const alertRoutes = require('./routes/alert.routes');
 const userRoutes = require('./routes/user.routes');
+const adminRoutes = require('./routes/admin.routes');
 const { error } = require('./utils/response');
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api/heartbeats', heartbeatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/alerts', alertRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((req, res) => {
   return error(res, 'Route not found', 404);
