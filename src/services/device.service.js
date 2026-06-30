@@ -22,7 +22,7 @@ const toCamelCaseDevicePayload = (payload) => {
     totalDisk: payload.totalDisk || payload.total_disk,
     macAddress: payload.macAddress || payload.mac_address,
     localIp: payload.localIp || payload.local_ip,
-    publicIp: payload.publicIp || payload.public_ip,
+    publicIp: payload.publicIp || payload.public_ip || payload.requestIp || payload.request_ip,
     appVersion: payload.appVersion || payload.app_version,
     status: payload.status,
     lastSeen: payload.lastSeen || payload.last_seen
@@ -35,6 +35,40 @@ const findDeviceByIdOrUuid = (deviceId) => {
   }
 
   return Device.findOne({ uuid: deviceId });
+};
+
+const findExistingDevice = async (userId, payload, deviceData) => {
+  const lookupId = payload.deviceId || payload.device_id || payload.uuid;
+
+  if (lookupId) {
+    const device = await findDeviceByIdOrUuid(lookupId);
+
+    if (device && device.user.equals(userId)) {
+      return device;
+    }
+  }
+
+  if (deviceData.macAddress) {
+    const device = await Device.findOne({
+      user: userId,
+      macAddress: deviceData.macAddress
+    });
+
+    if (device) {
+      return device;
+    }
+  }
+
+  if (deviceData.hostname && deviceData.username) {
+    return Device.findOne({
+      user: userId,
+      hostname: deviceData.hostname,
+      username: deviceData.username,
+      operatingSystem: deviceData.operatingSystem || null
+    });
+  }
+
+  return null;
 };
 
 const storeDevice = async (payload) => {
@@ -55,13 +89,13 @@ const storeDevice = async (payload) => {
     throw error;
   }
 
-  const existingDevice = payload.uuid
-    ? await Device.findOne({ uuid: payload.uuid, user: user._id })
-    : null;
+  const existingDevice = await findExistingDevice(user._id, payload, deviceData);
 
   if (existingDevice) {
     Object.assign(existingDevice, deviceData, {
-      user: user._id
+      user: user._id,
+      status: deviceData.status || existingDevice.status,
+      lastSeen: deviceData.status === 'online' ? new Date() : existingDevice.lastSeen
     });
 
     return existingDevice.save();
@@ -70,7 +104,8 @@ const storeDevice = async (payload) => {
   return Device.create({
     ...deviceData,
     user: user._id,
-    status: deviceData.status || 'offline'
+    status: deviceData.status || 'offline',
+    lastSeen: deviceData.status === 'online' ? new Date() : deviceData.lastSeen
   });
 };
 

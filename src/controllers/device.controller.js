@@ -3,7 +3,10 @@ const { success, error } = require('../utils/response');
 
 const storeDevice = async (req, res) => {
   try {
-    const device = await deviceService.storeDevice(req.body);
+    const device = await deviceService.storeDevice({
+      ...req.body,
+      request_ip: req.ip
+    });
     console.log(
       `[DEVICE] stored name="${device.deviceName}" uuid=${device.uuid} user=${device.user} status=${device.status}`
     );

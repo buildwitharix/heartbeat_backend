@@ -113,4 +113,7 @@ const deviceSchema = new mongoose.Schema(
   }
 );
 
+deviceSchema.index({ user: 1, macAddress: 1 });
+deviceSchema.index({ user: 1, hostname: 1, username: 1, operatingSystem: 1 });
+
 module.exports = mongoose.model('Device', deviceSchema);
